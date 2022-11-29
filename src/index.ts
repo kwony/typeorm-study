@@ -1,8 +1,28 @@
+import { CannotGetEntityManagerNotConnectedError, EntityManager } from 'typeorm';
 import { AppDataSource } from './data-source';
 import { Category } from './entity/Category';
 import { Photo } from './entity/Photo';
+import { Profile } from './entity/Profile';
 import { Question } from './entity/Question';
 import { User } from './entity/User';
+
+async function getUserProfile(manager: EntityManager) {
+  const users = await manager
+    .getRepository(User)
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.profile', 'profile')
+    .getMany();
+
+  console.log(users);
+
+  const users2 = await manager.getRepository(User).find({
+    relations: {
+      profile: true,
+    },
+  });
+
+  console.log(users2);
+}
 
 AppDataSource.initialize()
   .then(async () => {
@@ -21,13 +41,35 @@ AppDataSource.initialize()
 
     // await AppDataSource.manager.save(user);
 
-    const photos = await AppDataSource.manager
-      .getRepository(Photo)
-      .createQueryBuilder('photo')
-      .leftJoinAndSelect('photo.users', 'user')
-      .getMany();
+    // const profile = new Profile();
+    // profile.gender = 'male';
+    // profile.photo = 'me.jpg';
 
-    console.log(photos);
+    // await AppDataSource.manager.save(profile);
+
+    // const user = new User();
+    // user.name = 'Joe Smith';
+    // user.profile = profile;
+
+    // await AppDataSource.manager.save(user);
+
+    getUserProfile(AppDataSource.manager);
+
+    // const users = await AppDataSource.manager
+    //   .getRepository(User)
+    //   .createQueryBuilder('user')
+    //   .leftJoinAndSelect('user.profile', 'profile')
+    //   .getMany();
+
+    // console.log(users);
+
+    // const photos = await AppDataSource.manager
+    //   .getRepository(Photo)
+    //   .createQueryBuilder('photo')
+    //   .leftJoinAndSelect('photo.users', 'user')
+    //   .getMany();
+
+    // console.log(photos);
 
     // const questionRepository = AppDataSource.manager.getRepository(Question);
 
