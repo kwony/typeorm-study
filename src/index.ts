@@ -1,7 +1,9 @@
 import { EntityManager } from 'typeorm';
 import { AppDataSource } from './data-source';
+import { Category } from './entity/Category';
 import { Photo } from './entity/Photo';
 import { Profile } from './entity/Profile';
+import { Question } from './entity/Question';
 import { User } from './entity/User';
 
 async function createOneToOneExamples(manager: EntityManager) {
@@ -86,13 +88,61 @@ async function updateOneToMany(manager: EntityManager) {
   }
 }
 
+async function createManyToMany(manager: EntityManager) {
+  const category1 = new Category();
+  category1.name = 'animals';
+  await manager.save(category1);
+
+  const category2 = new Category();
+  category2.name = 'zoo';
+  await manager.save(category2);
+
+  const question = new Question();
+  question.title = 'dogs';
+  question.text = 'who let the dogs out?';
+  question.categories = [category1, category2];
+  await manager.save(question);
+}
+
+async function getManyToMany(manager: EntityManager) {
+  const questions = await manager.getRepository(Question).find({
+    relations: {
+      categories: true,
+    },
+    take: 1,
+  });
+
+  console.log(questions);
+}
+
+async function updateManyToMany(manager: EntityManager) {
+  const question = await manager.getRepository(Question).findOne({
+    relations: {
+      categories: true,
+    },
+    where: {
+      id: 1,
+    },
+  });
+
+  // 관계를 제거하는 작업. save 할 때 빼주면 된다
+  if (question != null) {
+    question.categories.length > 0 ? question.categories.pop() : '';
+
+    await manager.save(question);
+  }
+}
+
 AppDataSource.initialize()
   .then(async () => {
     // createOneToOneExamples(AppDataSource.manager);
     // getOneToOneExamples(AppDataSource.manager);
-
     // createOneToMany(AppDataSource.manager);
-    getOneToMany(AppDataSource.manager);
-    updateOneToMany(AppDataSource.manager);
+    // getOneToMany(AppDataSource.manager);
+    // updateOneToMany(AppDataSource.manager);
+
+    // await createManyToMany(AppDataSource.manager);
+    await updateManyToMany(AppDataSource.manager);
+    await getManyToMany(AppDataSource.manager);
   })
   .catch((error) => console.log(error));
