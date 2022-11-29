@@ -62,6 +62,29 @@ async function createOneToMany(manager: EntityManager) {
   await manager.save(user);
 }
 
+async function createOneToManyAndSoftDelete(manager: EntityManager) {
+  const photo1 = new Photo();
+  photo1.url = 'me-soft-remove.jpg';
+  await manager.save(photo1);
+
+  const photo2 = new Photo();
+  photo2.url = 'me-and-bears-soft-remove.jpg';
+  await manager.save(photo2);
+
+  const profile = new Profile();
+  profile.gender = 'male-soft-remove';
+  profile.photo = 'me.jpg';
+
+  const user = new User();
+  user.name = 'Soft';
+  user.photos = [photo1, photo2];
+  user.profile = profile;
+
+  const newUser = await manager.save(user);
+
+  await manager.softRemove(newUser);
+}
+
 async function getOneToMany(manager: EntityManager) {
   const users = await manager.getRepository(User).find({
     relations: {
@@ -167,11 +190,12 @@ AppDataSource.initialize()
     // await getManyToMany(AppDataSource.manager);
 
     // await createSoftDeletingManyToMany(AppDataSource.manager);
+    await createOneToManyAndSoftDelete(AppDataSource.manager);
 
-    const questions = await AppDataSource.manager.getRepository(Question).find({
-      relations: { categories: true },
-    });
+    // const questions = await AppDataSource.manager.getRepository(Question).find({
+    //   relations: { categories: true },
+    // });
 
-    console.log(questions);
+    // console.log(questions);
   })
   .catch((error) => console.log(error));
