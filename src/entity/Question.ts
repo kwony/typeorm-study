@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './Category';
 
 @Entity()
@@ -12,7 +12,10 @@ export class Question {
   @Column()
   text: string;
 
-  @ManyToMany(() => Category)
+  @ManyToMany(() => Category, {})
   @JoinTable() // 반드시 필요하다. 관계를 소유하는 쪽에다가 붙인다.
   categories: Category[];
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

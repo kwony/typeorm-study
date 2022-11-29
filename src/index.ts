@@ -133,6 +133,27 @@ async function updateManyToMany(manager: EntityManager) {
   }
 }
 
+async function createSoftDeletingManyToMany(manager: EntityManager) {
+  const category1 = new Category();
+  category1.name = `work ${new Date().getDate()}`;
+
+  const category2 = new Category();
+  category2.name = `money ${new Date().getDate()}`;
+
+  await manager.save(category1);
+  await manager.save(category2);
+
+  const question = new Question();
+  question.title = `whowhowho ${new Date().getDate()}}`;
+  question.text = 'who is that girl?';
+  question.categories = [category1, category2];
+  const newQuestion = await manager.save(question);
+
+  console.log(newQuestion);
+
+  await manager.softRemove(newQuestion);
+}
+
 AppDataSource.initialize()
   .then(async () => {
     // createOneToOneExamples(AppDataSource.manager);
@@ -142,7 +163,15 @@ AppDataSource.initialize()
     // updateOneToMany(AppDataSource.manager);
 
     // await createManyToMany(AppDataSource.manager);
-    await updateManyToMany(AppDataSource.manager);
-    await getManyToMany(AppDataSource.manager);
+    // await updateManyToMany(AppDataSource.manager);
+    // await getManyToMany(AppDataSource.manager);
+
+    // await createSoftDeletingManyToMany(AppDataSource.manager);
+
+    const questions = await AppDataSource.manager.getRepository(Question).find({
+      relations: { categories: true },
+    });
+
+    console.log(questions);
   })
   .catch((error) => console.log(error));
