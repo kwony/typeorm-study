@@ -6,7 +6,7 @@ import { Profile } from './entity/Profile';
 import { Question } from './entity/Question';
 import { User } from './entity/User';
 
-async function getUserProfile(manager: EntityManager) {
+async function getUserOneToOne(manager: EntityManager) {
   const users = await manager
     .getRepository(User)
     .createQueryBuilder('user')
@@ -22,6 +22,14 @@ async function getUserProfile(manager: EntityManager) {
   });
 
   console.log(users2);
+
+  const profiles = await manager.getRepository(Profile).find({
+    relations: {
+      user: true,
+    },
+  });
+
+  console.log(profiles);
 }
 
 AppDataSource.initialize()
@@ -53,7 +61,7 @@ AppDataSource.initialize()
 
     // await AppDataSource.manager.save(user);
 
-    getUserProfile(AppDataSource.manager);
+    getUserOneToOne(AppDataSource.manager);
 
     // const users = await AppDataSource.manager
     //   .getRepository(User)
