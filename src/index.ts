@@ -1,5 +1,7 @@
 import { EntityManager } from 'typeorm';
-import { AppDataSource } from './data-source';
+import AppDataSource from './data-source';
+import { Blog } from './entity/Book';
+
 import { Category } from './entity/Category';
 import { Photo } from './entity/Photo';
 import { Profile } from './entity/Profile';
@@ -177,6 +179,10 @@ async function createSoftDeletingManyToMany(manager: EntityManager) {
   await manager.softRemove(newQuestion);
 }
 
+async function bookSample() {
+  AppDataSource.manager;
+}
+
 AppDataSource.initialize()
   .then(async () => {
     // createOneToOneExamples(AppDataSource.manager);
@@ -190,7 +196,28 @@ AppDataSource.initialize()
     // await getManyToMany(AppDataSource.manager);
 
     // await createSoftDeletingManyToMany(AppDataSource.manager);
-    await createOneToManyAndSoftDelete(AppDataSource.manager);
+    // await createOneToManyAndSoftDelete(AppDataSource.manager);
+
+    // const blog = new Blog();
+    // blog.title = '아는개발자';
+
+    // await AppDataSource.manager.save(blog);
+
+    const blog = await AppDataSource.manager.getRepository(Blog).findOne({
+      where: {
+        id: 2,
+      },
+    });
+
+    console.log(blog);
+
+    // await AppDataSource.manager.softRemove(blog);
+
+    // const blogs = await AppDataSource.manager.getRepository(Blog).find({
+    //   take: 10,
+    // });
+
+    // console.log(blogs);
 
     // const questions = await AppDataSource.manager.getRepository(Question).find({
     //   relations: { categories: true },
